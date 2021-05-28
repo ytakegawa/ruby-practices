@@ -2,8 +2,6 @@ require "date"
 require "optparse"
 require "paint"
 
-#-y,-mオプションがない場合は、現在の年月を代入し、オプションがある場合は、入力値を年月に代入するプログラム
-#オプションにありえない数字が入力された場合は、警告を表示しプログラム終了とする。
 options = ARGV.getopts("m:", "y:")
 if options["y"] == nil
   year = Date.today.year
@@ -27,79 +25,35 @@ else
   end
 end
 
-today = Date.today
 start_day = Date.new(year, month, +1)
 last_day = Date.new(year, month, -1)
+today = Date.today
 
+# 年月週の装飾
 puts "       #{year}.#{month}"
 puts "Su Mo Tu We Th Fr Sa"
 
-#カレンダーの日付を整列させるプログラム
+# 最初の週の空欄表示
+start_day_space = "   " * start_day.wday
+print start_day_space
+
+# カレンダー表示
 (start_day..last_day).each do |d|
-  painted_today = Paint[d.day, :inverse]
-  if d == today && d.day == 1 && d.saturday?
-    puts "                   #{painted_today}"
-  elsif d == today && d.day == 1
-    position_of_start_day = d.cwday
-    case position_of_start_day
-    when 1
-      print "    #{painted_today} "
-    when 2
-      print "       #{painted_today} "
-    when 3
-      print "          #{painted_today} "
-    when 4
-      print "             #{painted_today} "
-    when 5
-      print "                #{painted_today} "
-      #when 6
-      #print "                   #{d.day}"
-    when 7
-      print " #{painted_today} "
-    end
-  elsif d == today && d.saturday?
-    if d.day <= 9
-      puts " #{painted_today} "
+  # 今日の日付の背景色を反転させるため、今日の日付を判定する条件分岐
+  if d == today
+    painted_today = Paint[d.day, :inverse]
+    # 日付が土曜日の場合は改行させるための条件分岐
+    if d.saturday?
+      printf("%2s\n", painted_today)
     else
-      puts painted_today
-    end
-  elsif d == today
-    if d.day <= 9
-      print " #{painted_today} "
-    else
-      print "#{painted_today} "
-    end
-  elsif d.day == 1 && d.saturday?
-    puts "                   #{d.day}"
-  elsif d.day == 1
-    position_of_start_day = d.cwday
-    case position_of_start_day
-    when 1
-      print "    #{d.day} "
-    when 2
-      print "       #{d.day} "
-    when 3
-      print "          #{d.day} "
-    when 4
-      print "             #{d.day} "
-    when 5
-      print "                #{d.day} "
-      #when 6
-      #print "                   #{d.day}"
-    when 7
-      print " #{d.day} "
+      printf("%2s ", painted_today)
     end
   elsif d.saturday?
-    if d.day <= 9
-      puts " #{d.day} "
-    else
-      puts d.day
-    end
+    printf("%2d\n", d.day)
   else
-    if d.day <= 9
-      print " #{d.day} "
-    else
-      print "#{d.day} "
-    end
+    printf("%2d ", d.day)
   end
 end
+
+# プログラムを実行したときに最後に表示される"%"を無くすため最後に改行入れる
+puts
