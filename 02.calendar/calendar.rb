@@ -3,26 +3,18 @@ require "optparse"
 require "paint"
 
 options = ARGV.getopts("m:", "y:")
-if options["y"] == nil
-  year = Date.today.year
-else
-  if options["y"].to_i < 1 || options["y"].to_i > 9999
-    puts "year #{options["y"].to_i} not in range 1~9999"
-    exit
-  else
-    year = options["y"].to_i
-  end
+year = (options["y"] || Date.today.year).to_i
+# ありえない数字が引数に入力された場合の処理
+if year < 1 || year > 9999
+  puts "year #{year} not in range 1~9999"
+  exit
 end
 
-if options["m"] == nil
-  month = Date.today.month
-else
-  if options["m"].to_i < 1 || options["m"].to_i > 12
-    puts "#{options["m"].to_i} is not a month number (1~12) "
-    exit
-  else
-    month = options["m"].to_i
-  end
+month = (options["m"] || Date.today.month).to_i
+# ありえない数字が引数に入力された場合の処理
+if month < 1 || month > 12
+  puts "#{month} is not a month number (1~12) "
+  exit
 end
 
 start_day = Date.new(year, month, +1)
@@ -56,4 +48,4 @@ print start_day_space
 end
 
 # プログラムを実行したときに最後に表示される"%"を無くすため最後に改行入れる
-puts
+puts ""
