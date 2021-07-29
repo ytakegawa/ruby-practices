@@ -1,15 +1,38 @@
-def generate(files)
-  max_bitesize = 20 #1ファイルの最大表示幅
-  # ファイル名のbitesizeによって出力方法を分岐
-  if files.all? { |file| file.bytesize <= max_bitesize }
-    multiple_column_output(files) # bitesizeが20未満の場合は、複数列での表示にする。
+#!/bin/sh ruby
+def output
+  require "optparse"
+  options = ARGV.getopts("a", "l", "r")
+  options["a"] ? files = Dir.glob("*", File::FNM_DOTMATCH) : files = Dir.glob("*")
+  files.reverse! if options["r"]
+  if options["l"]
+    output_file_info(files)
   else
-    single_column_output(files) # bitesizeが20以上のファイルがある場合は縦一列に並べるように分岐させる
+    output_file(files)
   end
 end
 
-def multiple_column_output(files)
+def output_file(files)
   max_bitesize = 20 #1ファイルの最大表示幅
+  # ファイル名のbitesizeによって出力方法を分岐
+  if files.all? { |file| file.bytesize <= max_bitesize }
+    sort_multiple_columns(files) # bitesizeが20未満の場合は、複数列に並べる
+  else
+    sort_single_column(files) # bitesizeが20以上のファイルがある場合は縦一列に並べる
+  end
+end
+
+def sort_multiple_columns(files)
+  generate_multiple_columns(files).each do |file|
+    max_bitesize = 20 #1ファイルの最大表示幅
+    file.each do |f|
+      space = " " * (max_bitesize - f.bytesize)
+      print f + space
+    end
+    puts
+  end
+end
+
+def generate_multiple_columns(files)
   columns = 3 # 列数
   rows = (files.size / columns.to_f) # 行数の算出
   rows_round_up = rows.ceil # 小数点を切り上げた行数の算出
@@ -40,27 +63,17 @@ def multiple_column_output(files)
         number_of_empty_object.times { file << " " }
       end
     end
-
   # 配列の行列を入れ替える
-  transposition_files = add_empty_object.transpose
-
-  # 配列を出力する
-  transposition_files.each do |file|
-    file.each do |f|
-      space = " " * (max_bitesize - f.bytesize)
-      print f + space
-    end
-    puts
-  end
+  add_empty_object.transpose
 end
 
-def single_column_output(files)
+def sort_single_column(files)
   files.each { |file| puts file }
 end
 
-# -lオプションが指定された時のファイル出力プログラム
-def file_info_generate(files)
+def output_file_info(files) # -lオプションが指定された時のファイル出力プログラム
   require "etc"
+  puts "total #{files.size}"
   convert_to_file_info(files).each.with_index do |f, i|
     print convert_to_permission(files)[i] + " "
     printf("%3d ", f.nlink)
@@ -75,68 +88,21 @@ def file_info_generate(files)
   end
 end
 
-# File::Statを使ってディレクトリのファイルの情報を配列に組み込む
 def convert_to_file_info(files)
-  files.map { |f| File::Stat.new(Dir.pwd.to_s + "/" + f.to_s) }
+  files.map { |f| File::Stat.new(Dir.pwd.to_s + "/" + f.to_s) } # File::Statを使ってディレクトリのファイルの情報を配列に組み込む
 end
 
-# ファイル情報のmode値をファイルの種類とパーミッションの値に変換する
-def convert_to_permission(files)
-  permission = []
-  convert_to_file_info(files).each do |file|
-    file_name_array = file.mode.to_s(8).chars
-    file_name_array.unshift("0") if file.mode.to_s(8).size < 6 # mode値が６未満の場合、配列の先頭に0を加える
-    file_name_array_slice = file_name_array.each_slice(3).to_a
-    permission <<
-      case file_name_array_slice[0] # ファイルの種類への変換
-      when ["0", "1", "0"]
-        ["p"]
-      when ["0", "2", "0"]
-        ["c"]
-      when ["0", "4", "0"]
-        ["d"]
-      when ["0", "6", "0"]
-        ["b"]
-      when ["1", "0", "0"]
-        ["-"]
-      when ["1", "2", "0"]
-        ["l"]
-      when ["1", "4", "0"]
-        ["s"]
+def convert_to_permission(files) # ファイル情報のmode値をファイルの種類とパーミッションの値に変換する
+  file_type = { "file" => "-", "directory" => "d", "characterSpecial" => "c", "blockSpecial" => "b", "fifo" => "p", "link" => "l", "socket" => "s" }
+  permission_type = { "0" => "---", "1" => "--x", "2" => "-w-", "3" => "-wx", "4" => "r--", "5" => "r-x", "6" => "rw-", "7" => "rwx" }
+  convert_to_file_info(files).map do |file|
+    array =
+      file_type.fetch_values(file.ftype) <<
+      file.mode.to_s(8).chars[-3, 3].map do |n| # mode値を配列にしてパーミッションを表す最後から3つ目の値を繰り返し処理する
+        permission_type.fetch_values(n).join
       end
-    permission <<
-    file_name_array_slice[1].map do |f| # パーミッション値への変換
-      case f
-      when "0"
-        "---"
-      when "1"
-        "--x"
-      when "2"
-        "-w-"
-      when "3"
-        "-wx"
-      when "4"
-        "r--"
-      when "5"
-        "r-x"
-      when "6"
-        "rw-"
-      when "7"
-        "rwx"
-      end
-    end
+    array.join
   end
-  permission.each_slice(2).map { |p| p.flatten.join } # ファイルの種類とパーミッション値をjoinして配列に返す
 end
 
-if __FILE__ == $PROGRAM_NAME
-  require "optparse"
-  options = ARGV.getopts("a", "l", "r")
-  options["a"] ? files = Dir.glob("*", File::FNM_DOTMATCH) : files = Dir.glob("*")
-  files.reverse! if options["r"]
-  if options["l"]
-    file_info_generate(files)
-  else
-    generate(files)
-  end
-end
+output
