@@ -12,21 +12,20 @@ def output
 end
 
 def output_file(files)
-  max_bitesize = 20 #1ファイルの最大表示幅
+  max_bytesize = 20 #1ファイルの最大表示幅
   # ファイル名のbitesizeによって出力方法を分岐
-  if files.all? { |file| file.bytesize <= max_bitesize }
-    sort_multiple_columns(files) # bitesizeが20未満の場合は、複数列に並べる
+  if files.all? { |file| file.bytesize <= max_bytesize }
+    output_multiple_columns(files) # bitesizeが20未満の場合は、複数列に並べる
   else
-    sort_single_column(files) # bitesizeが20以上のファイルがある場合は縦一列に並べる
+    output_single_column(files) # bitesizeが20以上のファイルがある場合は縦一列に並べる
   end
 end
 
-def sort_multiple_columns(files)
-  generate_multiple_columns(files).each do |file|
-    max_bitesize = 20 #1ファイルの最大表示幅
-    file.each do |f|
-      space = " " * (max_bitesize - f.bytesize)
-      print f + space
+def output_multiple_columns(files)
+  generate_multiple_columns(files).each do |elements|
+    max_bytesize = 20 #1ファイルの最大表示幅
+    elements.each do |file|
+      print file.ljust(max_bytesize)
     end
     puts
   end
@@ -67,8 +66,8 @@ def generate_multiple_columns(files)
   add_empty_object.transpose
 end
 
-def sort_single_column(files)
-  files.each { |file| puts file }
+def output_single_column(files)
+  puts files
 end
 
 def output_file_info(files) # -lオプションが指定された時のファイル出力プログラム
