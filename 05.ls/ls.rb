@@ -17,7 +17,7 @@ def output_file(files)
   if files.all? { |file| file.bytesize <= max_bytesize }
     output_multiple_columns(files) # bitesizeが20未満の場合は、複数列に並べる
   else
-    output_single_column(files) # bitesizeが20以上のファイルがある場合は縦一列に並べる
+    puts files # bitesizeが20以上のファイルがある場合は縦一列に並べる
   end
 end
 
@@ -25,7 +25,7 @@ def output_multiple_columns(files)
   generate_multiple_columns(files).each do |elements|
     max_bytesize = 20 #1ファイルの最大表示幅
     elements.each do |file|
-      print file.ljust(max_bytesize)
+      print file.to_s.ljust(max_bytesize)
     end
     puts
   end
@@ -53,21 +53,7 @@ def generate_multiple_columns(files)
     split_array_files << files[0, rows_round_down]
     files.shift(rows_round_down)
   end
-
-  # 分割した配列の行列を入れ替えるため、配列内の要素数を合わせる必要がある。よって、要素数に差異がある場合、空の文字列を追加する
-  add_empty_object =
-    split_array_files.each do |file|
-      if file.size < rows_round_up
-        number_of_empty_object = rows_round_up - file.size
-        number_of_empty_object.times { file << " " }
-      end
-    end
-  # 配列の行列を入れ替える
-  add_empty_object.transpose
-end
-
-def output_single_column(files)
-  puts files
+  split_array_files[0].zip(*split_array_files[1..-1]) # 配列の行列を入れ替える
 end
 
 def output_file_info(files) # -lオプションが指定された時のファイル出力プログラム
@@ -99,7 +85,7 @@ def convert_to_permission(files) # ファイル情報のmode値をファイル�
       file_type.fetch_values(file.ftype) <<
       file.mode.to_s(8).chars[-3, 3].map do |n| # mode値を配列にしてパーミッションを表す最後から3つ目の値を繰り返し処理する
         permission_type.fetch_values(n).join
-      end
+      end #.join("\n")
     array.join
   end
 end
