@@ -2,20 +2,27 @@
 def output
   require "optparse"
   options = ARGV.getopts("l")
-  generate_files_info.each.with_index do |file_info, i|
+  total_col = 0
+  total_word = 0
+  total_byte = 0
+  generate_files_info.map.with_index do |file_info, i|
+    total_col += file_info.count("\n")
+    total_word += file_info.split(/\s+/).size
+    total_byte += file_info.bytesize
     if options["l"]
-      printf("%8d", file_info.count("\n")) # 行数の出力
-      print " "
-      print ARGV[i]
-      puts
+      print file_info.count("\n").to_s.rjust(8) # 行数の出力
+      print " #{ARGV[i]}" "\n"
     else
-      printf("%8d", file_info.count("\n")) # 行数の出力
-      printf("%8d", file_info.split(/\s+/).size) # 単語数の出力
-      printf("%8d", file_info.bytesize) # バイト数の出力
-      print " "
-      print ARGV[i]
-      puts
+      print file_info.count("\n").to_s.rjust(8) # 行数の出力
+      print file_info.split(/\s+/).size.to_s.rjust(8) # 単語数の出力
+      print file_info.bytesize.to_s.rjust(8) # バイト数の出力
+      print " #{ARGV[i]}" "\n"
     end
+  end
+  if options["l"]
+    puts "#{total_col.to_s.rjust(8)} total"
+  else
+    puts "#{total_col.to_s.rjust(8)}#{total_word.to_s.rjust(8)}#{total_byte.to_s.rjust(8)} total"
   end
 end
 
