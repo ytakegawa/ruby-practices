@@ -1,15 +1,15 @@
 #!/bin/sh ruby
+require "optparse"
+OPTIONS = ARGV.getopts("l")
+
+def main
+  output
+  total_calc
+end
+
 def output
-  require "optparse"
-  options = ARGV.getopts("l")
-  total_col = 0
-  total_word = 0
-  total_byte = 0
   generate_files_info.map.with_index do |file_info, i|
-    total_col += file_info.count("\n")
-    total_word += file_info.split(/\s+/).size
-    total_byte += file_info.bytesize
-    if options["l"]
+    if OPTIONS["l"]
       print file_info.count("\n").to_s.rjust(8) # 行数の出力
       print " #{ARGV[i]}" "\n"
     else
@@ -19,7 +19,18 @@ def output
       print " #{ARGV[i]}" "\n"
     end
   end
-  if options["l"]
+end
+
+def total_calc
+  total_col = 0
+  total_word = 0
+  total_byte = 0
+  generate_files_info.map do |file_info|
+    total_col += file_info.count("\n")
+    total_word += file_info.split(/\s+/).size
+    total_byte += file_info.bytesize
+  end
+  if OPTIONS["l"]
     puts "#{total_col.to_s.rjust(8)} total"
   else
     puts "#{total_col.to_s.rjust(8)}#{total_word.to_s.rjust(8)}#{total_byte.to_s.rjust(8)} total"
@@ -38,4 +49,4 @@ def generate_files_info # コマンド引数の処理
   files_info
 end
 
-output
+main
