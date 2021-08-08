@@ -1,10 +1,11 @@
-#!/bin/sh ruby
+# frozen_string_literal: true
+# !/bin/sh ruby
 require "optparse"
 OPTIONS = ARGV.getopts("l")
 
 def main
   output
-  total_calc
+  total_calc if ARGV.find { |a| File.file?(a) }
 end
 
 def output
