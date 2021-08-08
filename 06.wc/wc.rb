@@ -5,7 +5,7 @@ OPTIONS = ARGV.getopts("l")
 
 def main
   output
-  total_calc if ARGV.find { |a| File.file?(a) }
+  total_calc if ARGV.find { |a| File.file?(a) } && ARGV.size >= 2
 end
 
 def output
