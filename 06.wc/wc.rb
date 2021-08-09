@@ -1,7 +1,7 @@
 # frozen_string_literal: true
-# !/bin/sh ruby
-require "optparse"
-OPTIONS = ARGV.getopts("l")
+
+require 'optparse'
+OPTIONS = ARGV.getopts('l')
 
 def main
   output
@@ -10,15 +10,12 @@ end
 
 def output
   generate_files_info.map.with_index do |file_info, i|
-    if OPTIONS["l"]
-      print file_info.count("\n").to_s.rjust(8) # 行数の出力
-      print " #{ARGV[i]}" "\n"
-    else
-      print file_info.count("\n").to_s.rjust(8) # 行数の出力
+    print file_info.count("\n").to_s.rjust(8)
+    unless OPTIONS['l']
       print file_info.split(/\s+/).size.to_s.rjust(8) # 単語数の出力
       print file_info.bytesize.to_s.rjust(8) # バイト数の出力
-      print " #{ARGV[i]}" "\n"
     end
+    print " #{ARGV[i]}" "\n"
   end
 end
 
@@ -31,14 +28,15 @@ def total_calc
     total_word += file_info.split(/\s+/).size
     total_byte += file_info.bytesize
   end
-  if OPTIONS["l"]
+  if OPTIONS['l']
     puts "#{total_col.to_s.rjust(8)} total"
   else
     puts "#{total_col.to_s.rjust(8)}#{total_word.to_s.rjust(8)}#{total_byte.to_s.rjust(8)} total"
   end
 end
 
-def generate_files_info # コマンド引数の処理
+# コマンド引数の処理
+def generate_files_info
   files_info = []
   if ARGV.find { |a| File.file?(a) } # コマンド引数にファイルパスがあるかどうか
     ARGV.each do |file_path|
