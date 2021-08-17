@@ -3,31 +3,31 @@
 require "optparse"
 
 def main
-  elements = generate_files_info.map { |file_info| build_elements(file_info) }
+  elements = generate_file_objects.map { |file_object| build_elements(file_object) }
   elements.each do |element|
     line = element[:line]
     word = element[:word]
     byte = element[:byte]
-    path = File.path(element[:path]) if File.file?(element[:path]) # $stdinの場合pathが不要なので、path:の値がファイルオブジェクトの場合にpathを表示させる
+    path = File.path(element[:path]) if File.file?(element[:path]) # $stdinの場合filepathが不要なので、path:の値がファイルオブジェクトの場合にpathを表示させる
     display_elements(line, word, byte, path)
   end
   total_calc(elements) if ARGV.size >= 2 # コマンド引数が2つ以上の場合、total値の出力
 end
 
 # コマンド引数の処理
-def generate_files_info
-  files_info = []
-  ARGV.size >= 1 ? ARGV.each { |file_path| files_info << File.open(file_path) } : files_info << $stdin
-  files_info
+def generate_file_object
+  file_objects = []
+  ARGV.size >= 1 ? ARGV.each { |file_path| file_objects << File.open(file_path) } : file_objects << $stdin
+  file_objects
 end
 
-def build_elements(file_info)
-  read_file = file_info.read
+def build_elements(file_object)
+  read_file = file_object.read
   {
     line: read_file.count("\n"),
     word: read_file.split(/\s+/).size,
     byte: read_file.bytesize,
-    path: file_info,
+    path: file_object,
   }
 end
 
