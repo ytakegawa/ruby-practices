@@ -3,17 +3,15 @@
 require "optparse"
 
 def main
-  options = ARGV.getopts("l")
   elements = generate_files_info.map { |file_info| build_elements(file_info) }
   elements.each do |element|
-    print format(element[:line]) # 行数の出力
-    unless options["l"]
-      print format(element[:word]) # 単語数の出力
-      print format(element[:byte]) # バイト数の出力
-    end
-    print " #{element[:path]}" "\n" # ファイルパスの出力
+    line = element[:line]
+    word = element[:word]
+    byte = element[:byte]
+    path = element[:path]
+    display_elements(line, word, byte, path)
   end
-  total_calc(elements, options) if ARGV.find { |a| File.file?(a) } && ARGV.size >= 2 # total値の出力
+  total_calc(elements) if ARGV.find { |a| File.file?(a) } && ARGV.size >= 2 # total値の出力
 end
 
 # コマンド引数の処理
@@ -39,15 +37,22 @@ def build_elements(file_info)
   }
 end
 
-def total_calc(elements, options)
-  total_line = elements.sum { |element| element[:line] }
-  total_word = elements.sum { |element| element[:word] }
-  total_byte = elements.sum { |element| element[:byte] }
-  if options["l"]
-    puts "#{format(total_line)} total"
-  else
-    puts "#{format(total_line)}#{format(total_word)}#{format(total_byte)} total"
+def total_calc(elements)
+  line = elements.sum { |element| element[:line] }
+  word = elements.sum { |element| element[:word] }
+  byte = elements.sum { |element| element[:byte] }
+  path = "total"
+  display_elements(line, word, byte, path)
+end
+
+def display_elements(line, word, byte, path) #line, word, byte, path, elements, options
+  options = ARGV.getopts("l")
+  print format(line) # 行数の出力
+  unless options["l"]
+    print format(word) # 単語数の出力
+    print format(byte) # バイト数の出力
   end
+  print " #{path}" "\n" # ファイルパスの出力
 end
 
 def format(value)
