@@ -6,10 +6,10 @@ def main
   options = ARGV.getopts("l")
   elements = generate_files_info.map { |file_info| build_elements(file_info) }
   elements.each do |element|
-    print element[:col].to_s.rjust(8) # 行数の出力
+    print format(element[:line]) # 行数の出力
     unless options["l"]
-      print element[:word].to_s.rjust(8) # 単語数の出力
-      print element[:byte].to_s.rjust(8) # バイト数の出力
+      print format(element[:word]) # 単語数の出力
+      print format(element[:byte]) # バイト数の出力
     end
     print " #{element[:path]}" "\n" # ファイルパスの出力
   end
@@ -32,7 +32,7 @@ end
 def build_elements(file_info)
   read_file = file_info.read
   {
-    col: read_file.count("\n"),
+    line: read_file.count("\n"),
     word: read_file.split(/\s+/).size,
     byte: read_file.bytesize,
     path: File.path(file_info),
@@ -40,14 +40,18 @@ def build_elements(file_info)
 end
 
 def total_calc(elements, options)
-  total_col = elements.sum { |element| element[:col] }
+  total_line = elements.sum { |element| element[:line] }
   total_word = elements.sum { |element| element[:word] }
   total_byte = elements.sum { |element| element[:byte] }
   if options["l"]
-    puts "#{total_col.to_s.rjust(8)} total"
+    puts "#{format(total_line)} total"
   else
-    puts "#{total_col.to_s.rjust(8)}#{total_word.to_s.rjust(8)}#{total_byte.to_s.rjust(8)} total"
+    puts "#{format(total_line)}#{format(total_word)}#{format(total_byte)} total"
   end
+end
+
+def format(value)
+  value.to_s.rjust(8)
 end
 
 main
