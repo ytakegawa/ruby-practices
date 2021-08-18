@@ -3,7 +3,7 @@
 require "optparse"
 
 def main
-  elements = generate_file_objects.map { |file_object| build_elements(file_object) }
+  elements = command_arg_or_stdin_to_array.map { |object| build_elements(object) }
   elements.each do |element|
     line = element[:line]
     word = element[:word]
@@ -14,20 +14,20 @@ def main
   total_calc(elements) if ARGV.size >= 2 # コマンド引数が2つ以上の場合、total値の出力
 end
 
-# コマンド引数の処理
-def generate_file_object
-  file_objects = []
-  ARGV.size >= 1 ? ARGV.each { |file_path| file_objects << File.open(file_path) } : file_objects << $stdin
-  file_objects
+# コマンド引数をファイルオブジェクトにして配列に格納する。標準入力の場合はそのまま格納。
+def command_arg_or_stdin_to_array
+  array = []
+  ARGV.size >= 1 ? ARGV.each { |arg| array << File.open(arg) } : array << $stdin
+  array
 end
 
-def build_elements(file_object)
-  read_file = file_object.read
+def build_elements(object)
+  txt_object = object.read
   {
-    line: read_file.count("\n"),
-    word: read_file.split(/\s+/).size,
-    byte: read_file.bytesize,
-    path: file_object,
+    line: txt_object.count("\n"),
+    word: txt_object.split(/\s+/).size,
+    byte: txt_object.bytesize,
+    path: object,
   }
 end
 
