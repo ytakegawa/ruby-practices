@@ -1,55 +1,52 @@
 # frozen_string_literal: true
 
-require 'optparse'
+require "optparse"
 
 def main
-  elements = command_arg_or_stdin_to_array.map { |object| build_elements(object) }
-  elements.each_with_index do |element, i|
-    line = element[:line]
-    word = element[:word]
-    byte = element[:byte]
-    path = ARGV[i]
-    display_elements(line, word, byte, path)
+  options = ARGV.getopts("l")
+  values = read_texts.map { |text_file| build_value(text_file) }
+  values.each do |value|
+    line = value[:line]
+    word = value[:word]
+    byte = value[:byte]
+    path = value[:path]
+    display_value(line, word, byte, path, options)
   end
-  total_calc(elements) if ARGV.size >= 2 # コマンド引数が2つ以上の場合、total値を出力する。
+  calc_total_num(values, options) if ARGV.size >= 2
 end
 
-# コマンド引数をファイルオブジェクトにして配列に格納する。標準入力の場合はそのまま格納。
-def command_arg_or_stdin_to_array
-  array = []
-  ARGV.size >= 1 ? ARGV.each { |arg| array << File.open(arg) } : array << $stdin
-  array
+def read_texts
+  ARGV.size >= 1 ? ARGV.map { |path| [File.read(path), path] } : [[$stdin.read]]
 end
 
-def build_elements(object)
-  txt_object = object.read
+def build_value(text_file)
   {
-    line: txt_object.count("\n"),
-    word: txt_object.split(/\s+/).size,
-    byte: txt_object.bytesize
+    line: text_file[0].count("\n"),
+    word: text_file[0].split(/\s+/).size,
+    byte: text_file[0].bytesize,
+    path: text_file[1],
   }
 end
 
-def display_elements(line, word, byte, path)
-  options = ARGV.getopts('l')
-  print trim_space(line) # 行数の出力
-  unless options['l']
-    print trim_space(word) # 単語数の出力
-    print trim_space(byte) # バイト数の出力
+def display_value(line, word, byte, path, options)
+  print format_value(line) # 行数の出力
+  unless options["l"]
+    print format_value(word) # 単語数の出力
+    print format_value(byte) # バイト数の出力
   end
   print " #{path}" "\n" # ファイルパスの出力
 end
 
-def trim_space(value)
+def format_value(value)
   value.to_s.rjust(8)
 end
 
-def total_calc(elements)
-  total_line = elements.sum { |element| element[:line] }
-  total_word = elements.sum { |element| element[:word] }
-  total_byte = elements.sum { |element| element[:byte] }
-  path = 'total'
-  display_elements(total_line, total_word, total_byte, path)
+def calc_total_num(file_value, options)
+  total_line = file_value.sum { |element| element[:line] }
+  total_word = file_value.sum { |element| element[:word] }
+  total_byte = file_value.sum { |element| element[:byte] }
+  path = "total"
+  display_value(total_line, total_word, total_byte, path, options)
 end
 
 main
