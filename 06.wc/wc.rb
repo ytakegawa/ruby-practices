@@ -13,7 +13,7 @@ def main
 end
 
 def read_texts
-  ARGV.size >= 1 ? ARGV.map { |path| [File.read(path), path] } : [[$stdin.read]]
+  ARGV.size >= 1 ? ARGV.map { |path| [File.read(path), path] } : [[$stdin.read, nil]]
 end
 
 def build_values(text_file)
