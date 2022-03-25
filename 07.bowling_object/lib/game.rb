@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'frame'
-require 'byebug'
 
 class Game
   def initialize(marks)
