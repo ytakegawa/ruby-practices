@@ -1,31 +1,21 @@
+# frozen_string_literal: true
+
 require_relative 'frame'
+require 'byebug'
 
 class Game
   def initialize(marks)
-    @frames = marks_to_frames(marks)
+    @marks = marks
   end
 
   def score
+    frames = marks_to_frames(@marks)
     point = 0
-    @frames.each_with_index do |frame, i|
+    frames.each_with_index do |frame, i|
       this_frame = Frame.new(frame[0], frame[1], frame[2], i)
-      if this_frame.strike?
-        next_frame = Frame.new(@frames[i + 1][0], @frames[i + 1][1], @frames[i + 1][2], i + 1)
-        point += next_frame.first_shot.score
-        if next_frame.strike?
-          if next_frame.final_frame?
-            point += next_frame.second_shot.score
-          else
-            after_next_frame = Frame.new(@frames[i + 2][0], @frames[i + 2][1], @frames[i + 2][2], i + 2)
-            point += after_next_frame.first_shot.score
-          end
-        end
-        point += next_frame.second_shot.score
-      elsif this_frame.spare?
-        next_frame = Frame.new(@frames[i + 1][0], @frames[i + 1][1], @frames[i + 1][2], i + 1)
-        point += next_frame.first_shot.score
-      end
-      point += this_frame.score
+      next_frame = Frame.new(frames[i + 1][0], frames[i + 1][1], frames[i + 1][2], i + 1) if this_frame.frame_index <= 8
+      after_next_frame = Frame.new(frames[i + 2][0], frames[i + 2][1], frames[i + 2][2], i + 2) if this_frame.frame_index <= 7
+      point += this_frame.score + add_bonus_point(this_frame, next_frame, after_next_frame)
     end
     point
   end
@@ -38,13 +28,30 @@ class Game
     9.times do
       frame = pins.shift(2)
       if frame.first == 'X'
-        frames << ['X', '0']
+        frames << %w[X 0]
         pins.unshift(frame.last)
       else
         frames << frame
       end
     end
     frames << pins
+  end
+
+  def add_bonus_point(this_frame, next_frame, after_next_frame = nil)
+    bonus_point = 0
+    if this_frame.strike?
+      bonus_point = next_frame.first_shot.score + next_frame.second_shot.score
+      if next_frame.strike? && after_next_frame
+        bonus_point = next_frame.first_shot.score + after_next_frame.first_shot.score
+      elsif next_frame.strike?
+        bonus_point = next_frame.first_shot.score + next_frame.second_shot.score
+      end
+    elsif this_frame.spare?
+      bonus_point = next_frame.first_shot.score
+    else
+      bonus_point = 0
+    end
+    bonus_point
   end
 end
 
