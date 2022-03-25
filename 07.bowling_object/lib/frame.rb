@@ -18,15 +18,19 @@ class Frame
   end
 
   def strike?
-    @first_shot.score == 10 && @second_shot.score == 0
+    @first_shot.score == 10 && @second_shot.score == 0 && !final_frame?
   end
 
   def spere?
-    @first_shot.score != 10 && @first_shot.score + @second_shot.score == 10
+    @first_shot.score != 10 && @first_shot.score + @second_shot.score == 10 && !final_frame?
   end
 
   def next_frame_bonus
-    @first_shot.score + @second_shot.score
+    if strike?
+      @first_shot.score
+    else
+      @first_shot.score + @second_shot.score
+    end
   end
 
   def next_first_shot_bonus
@@ -37,10 +41,9 @@ class Frame
     @second_shot.score
   end
 
+  #private
+
   def final_frame?
     @frame_index == 9
   end
 end
-
-frame = Frame.new('1', '9', 2)
-p frame.score
