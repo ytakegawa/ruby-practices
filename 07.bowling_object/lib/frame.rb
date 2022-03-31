@@ -17,11 +17,11 @@ class Frame
   end
 
   def strike?
-    @first_shot.score == 10 unless final_frame?
+    !final_frame? && @first_shot.score == 10
   end
 
   def spare?
-    @first_shot.score + @second_shot.score == 10 unless final_frame?
+    !strike? && !final_frame? && @first_shot.score + @second_shot.score == 10
   end
 
   private

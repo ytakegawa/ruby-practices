@@ -37,20 +37,17 @@ class Game
   end
 
   def add_bonus_point(this_frame, next_frame, after_next_frame = nil)
-    bonus_point = 0
-    if this_frame.strike?
-      bonus_point = next_frame.first_shot.score + next_frame.second_shot.score
-      if next_frame.strike? && after_next_frame
-        bonus_point = next_frame.first_shot.score + after_next_frame.first_shot.score
-      elsif next_frame.strike?
-        bonus_point = next_frame.first_shot.score + next_frame.second_shot.score
-      end
+    if this_frame.strike? && next_frame.strike? && after_next_frame
+      next_frame.first_shot.score + after_next_frame.first_shot.score
+    elsif this_frame.strike? && next_frame.strike? && !after_next_frame
+      next_frame.first_shot.score + next_frame.second_shot.score
+    elsif this_frame.strike?
+      next_frame.first_shot.score + next_frame.second_shot.score
     elsif this_frame.spare?
-      bonus_point = next_frame.first_shot.score
+      next_frame.first_shot.score
     else
-      bonus_point = 0
+      0
     end
-    bonus_point
   end
 end
 
