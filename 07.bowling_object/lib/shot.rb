@@ -6,6 +6,7 @@ class Shot
   end
 
   def score
-    @mark == 'X' ? @mark = 10 : @mark.to_i
+    @mark = '10' if @mark == 'X'
+    @mark.to_i
   end
 end
