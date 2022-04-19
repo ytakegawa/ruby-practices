@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'etc'
 
 class LongFormat
@@ -8,8 +10,8 @@ class LongFormat
     'blockSpecial' => 'b',
     'fifo' => 'p',
     'link' => 'l',
-    'socket' => 's',
-  }
+    'socket' => 's'
+  }.freeze
 
   MODE_TYPE = {
     '0' => '---',
@@ -19,8 +21,8 @@ class LongFormat
     '4' => 'r--',
     '5' => 'r-x',
     '6' => 'rw-',
-    '7' => 'rwx',
-  }
+    '7' => 'rwx'
+  }.freeze
 
   def initialize(file_paths)
     @file_paths = file_paths
@@ -47,7 +49,7 @@ class LongFormat
       grpname: Etc.getgrgid(file_stat.gid).name,
       bytesize: file_stat.size.to_s,
       mtime: file_stat.mtime.strftime('%b %e %H:%M'),
-      blocks: file_stat.blocks,
+      blocks: file_stat.blocks
     }
   end
 
@@ -64,7 +66,7 @@ class LongFormat
       "  #{file_stat[:grpname].ljust(grpname_size)}",
       "  #{file_stat[:bytesize].rjust(bytesize_size)}",
       " #{file_stat[:mtime]}",
-      " #{file_stat[:path]}",
+      " #{file_stat[:path]}"
     ].join
   end
 

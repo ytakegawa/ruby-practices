@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StandardFomat
   def initialize(file_paths, column_num)
     @file_paths = file_paths
