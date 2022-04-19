@@ -1,5 +1,6 @@
 require 'optparse'
 require_relative 'standard_fomat'
+require_relative 'long_fomat'
 
 class Ls
   COLUMN_NUM = 3
