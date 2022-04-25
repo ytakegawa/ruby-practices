@@ -6,7 +6,7 @@ class StandardFomat
     @column_num = column_num
   end
 
-  def sort
+  def show_files
     row_num = (@file_paths.size / @column_num.to_f).ceil
     max_length = @file_paths.max.size
     lines = Array.new(row_num) { [] }

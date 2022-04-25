@@ -12,17 +12,12 @@ class Ls
   end
 
   def run
-    file_paths =
-      @params['a'] ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
-    # data =
-    #   @params['r'] ? StandardFomat.new(file_paths.reverse!, COLUMN_NUM) : StandardFomat.new(file_paths, COLUMN_NUM)
-    # data = LongFormat.new(file_paths) if @params['l']
-
-    file_paths = file_paths.reverse! if @params['r']
+    file_paths = Dir.glob('*', @params['a'] ? File::FNM_DOTMATCH : 0)
+    file_paths.reverse! if @params['r']
     file_format =
       @params['l'] ? LongFormat.new(file_paths) : StandardFomat.new(file_paths, COLUMN_NUM)
 
-    file_format.sort
+    file_format.show_files
   end
 end
 
